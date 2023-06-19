@@ -11,87 +11,121 @@ public class DropdownMenu {
     public static String baseURL = "https://mail.rediff.com/cgi-bin/login.cgi";
     public static WebDriver driver;
 
-    public WebDriver getDriver() {
-        // Set the system property for Chrome driver. Save your driver in "drivers" directory under project folder.
+    public static void main(String[] args) throws InterruptedException {
+        DropdownMenu ddMenu = new DropdownMenu();
+        driver = ddMenu.getChromeDriver();
+        driver.manage().window().maximize();
+        driver.get(baseURL);
+
+        clickCreateNewAccountLink();
+
+        enterFirstName("Kamal");
+
+        enterRediffMail("kamal1234");
+
+        checkAvailability();
+
+        selectAutoSuggestedMailOption();
+
+        enterPassword("Kamal@1234");
+
+        retypePassword("Kamal@1234");
+
+        selectAlternateIdCheckbox();
+
+        selectDateOfBirth("20", "06", "2000");
+
+        printCountryList();
+
+        selectCountry("India");
+
+        validateSelectedCountry("India");
+
+        closeBrowser();
+    }
+
+    public WebDriver getChromeDriver() {
+        // Set the system property for Chrome driver
         String relativePath = System.getProperty("user.dir") + "/drivers/chromedriver";
         System.setProperty("webdriver.chrome.driver", relativePath);
 
         // Create a Chrome driver instance
-        return (WebDriver) new ChromeDriver();
+        return new ChromeDriver();
     }
 
-    public static void main(String[] args) throws  InterruptedException {
-        DropdownMenu ddMenu = new DropdownMenu();
-        driver = ddMenu.getDriver();
-        driver.manage().window().maximize();
-        driver.get(baseURL);
-
-        // Click on "Create a new account link"
+    public static void clickCreateNewAccountLink() {
         driver.findElement(By.linkText("Create a new account")).click();
+    }
 
-        // First Name as “Kamal”
-        driver.findElement(By.xpath("//*[@id=\"tblcrtac\"]/tbody/tr[3]/td[3]/input")).sendKeys("Kamal");
+    public static void enterFirstName(String firstName) {
+        driver.findElement(By.xpath("//*[@id=\"tblcrtac\"]/tbody/tr[3]/td[3]/input")).sendKeys(firstName);
+    }
 
-        // Rediff mail as “kamal1234”
-        driver.findElement(By.xpath("//*[@id=\"tblcrtac\"]/tbody/tr[7]/td[3]/input[1]")).sendKeys("kamal1234");
+    public static void enterRediffMail(String rediffMail) {
+        driver.findElement(By.xpath("//*[@id=\"tblcrtac\"]/tbody/tr[7]/td[3]/input[1]")).sendKeys(rediffMail);
+    }
 
-        // Click on “Check Availability” button
+    public static void checkAvailability() {
         driver.findElement(By.className("btn_checkavail")).click();
-
         driver.manage().timeouts().implicitlyWait(8, TimeUnit.SECONDS);
+    }
 
-        // Select auto suggested mail options
+    public static void selectAutoSuggestedMailOption() {
         driver.findElement(By.name("radio_login")).click();
+    }
 
-        // Password as “Kamal@1234”
-        driver.findElement(By.id("newpasswd")).sendKeys("Kamal@1234");
+    public static void enterPassword(String password) {
+        driver.findElement(By.id("newpasswd")).sendKeys(password);
+    }
 
-        // Retype password as “Kamal@1234”
-        driver.findElement(By.id("newpasswd1")).sendKeys("Kamal@1234");
+    public static void retypePassword(String password) {
+        driver.findElement(By.id("newpasswd1")).sendKeys(password);
+    }
 
-        // Select the Checkbox “Click if you don't have an alternate ID”
+    public static void selectAlternateIdCheckbox() {
         driver.findElement(By.className("nomargin")).click();
+    }
 
-        // Select the Date of Birth “20-Jun-2000”
-        // Using Xpath, as other tags are unavailable
+    public static void selectDateOfBirth(String day, String month, String year) {
         Select dobDay = new Select(driver.findElement(By.xpath("//*[@id=\"tblcrtac\"]/tbody/tr[22]/td[3]/select[1]")));
-        dobDay.selectByValue("20");
+        dobDay.selectByValue(day);
 
-        Select dobMon = new Select(driver.findElement(By.xpath("//*[@id=\"tblcrtac\"]/tbody/tr[22]/td[3]/select[2]")));
-        dobMon.selectByValue("06");
+        Select dobMonth = new Select(driver.findElement(By.xpath("//*[@id=\"tblcrtac\"]/tbody/tr[22]/td[3]/select[2]")));
+        dobMonth.selectByValue(month);
 
         Select dobYear = new Select(driver.findElement(By.xpath("//*[@id=\"tblcrtac\"]/tbody/tr[22]/td[3]/select[3]")));
-        dobYear.selectByValue("2000");
+        dobYear.selectByValue(year);
+    }
 
-        // Printing Country list to console
+    public static void printCountryList() {
         Select country = new Select(driver.findElement(By.id("country")));
         List<WebElement> countries = country.getOptions();
+        System.out.println("-------------------------------------------------------------");
         for (WebElement countryElement : countries) {
             String count = countryElement.getText();
             System.out.println(count);
         }
-
-        // Country count to console
         System.out.println("-------------------------------------------------------------");
         System.out.println("Total number of countries are: " + country.getOptions().size());
+    }
 
-        // Select India from country dropdown
-        country.selectByVisibleText("India");
+    public static void selectCountry(String countryName) {
+        Select country = new Select(driver.findElement(By.id("country")));
+        country.selectByVisibleText(countryName);
+    }
 
-        // Print Selected country to console
+    public static void validateSelectedCountry(String expectedCountry) {
+        Select country = new Select(driver.findElement(By.id("country")));
+        String selectedCountry = country.getFirstSelectedOption().getText();
         System.out.println("-------------------------------------------------------------");
-        System.out.println("Selected country is: " + country.getFirstSelectedOption().getText());
-
-        // Validate the selected country against the expected
-        if(country.getFirstSelectedOption().getText().equals("India")) {
-            System.out.println("-------------------------------------------------------------");
-            System.out.println("Validation Passed (India is selected)");
+        if (selectedCountry.equals(expectedCountry)) {
+            System.out.println("Validation Passed (Selected country is: " + selectedCountry + ")");
         } else {
-            System.out.println("-------------------------------------------------------------");
-            System.out.println("Validation Failed");
+            System.out.println("Validation Failed (Selected country is: " + selectedCountry + ")");
         }
+    }
 
-        // Quit Browser
-        driver.close();
+    public static void closeBrowser() {
+        driver.quit();
     }
 }

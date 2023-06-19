@@ -5,8 +5,10 @@ out/
 .idea
 drivers/
 
+
 ### Eclipse ###
 .apt_generated
+.iml
 .classpath
 .factorypath
 .project
